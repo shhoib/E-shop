@@ -43,6 +43,17 @@ export const CartContextProvider = (props:Props)=>{
         })
     },[])
 
+    const handleRemoveProductFromCart = useCallback((product:CartProductType)=>{
+        if(cartProducts){
+            const filteredProducts = cartProducts.filter((item)=>{
+                return item.id !== product.id
+            })
+            setCartProducts(filteredProducts);
+            toast.success('Product Removed')
+            localStorage.setItem('eshopCartItems',JSON.stringify(filteredProducts))
+        }
+    },[cartProducts])
+
     const value = {
         cartTotalQty,
         cartProducts,
