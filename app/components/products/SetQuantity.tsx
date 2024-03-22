@@ -2,7 +2,7 @@
 
 import { CartProductType } from "@/app/product/[productId]/ProductDetails";
 
-const btnStyles = `border=[1.2px] border-slate-300 px-2 rounded`;
+const btnStyles = `border-[1.2px] border-slate-300 px-2 rounded`;
 
 interface SetQtyProps{
     cartCounter?:boolean,
