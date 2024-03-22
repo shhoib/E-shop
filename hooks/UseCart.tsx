@@ -31,8 +31,6 @@ export const CartContextProvider = (props:Props)=>{
 
         setCartProducts(cProducts)
     },[])
-    console.log(cartTotalAmount);
-    console.log(cartTotalQty);
     
 
     useEffect(()=>{
