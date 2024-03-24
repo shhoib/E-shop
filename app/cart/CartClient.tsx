@@ -6,10 +6,38 @@ import Heading from "../components/Heading";
 import Button from "../components/Button";
 import ItemContent from "./ItemContent";
 import { formatPrice } from "@/utils/formatPrice";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import axios from "axios";
+import React, { useCallback } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+
 
 const CartClient = () => {
 
     const {cartProducts,handleClearCart,cartTotalAmount} = useCart();
+
+    const stripe = useStripe();
+    const elements = useElements();
+    console.log('payment1');
+
+    const handlePayment = useCallback(async()=>{
+        console.log('payment2');
+        
+        const cardElement = elements?.getElement("card");
+        try {
+            if (!stripe || !cardElement) return null;
+            const { data } = await axios.post("/api/create-payment-intent", {
+                data: { amount: 89 },
+            });
+            const clientSecret = data;
+
+            await stripe.confirmCardPayment(clientSecret, {
+                payment_method: { card: cardElement },
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    },[elements, stripe]);
 
     if(!cartProducts || cartProducts.length === 0){
         return (
@@ -24,6 +52,9 @@ const CartClient = () => {
             </div>
         )
     }
+
+  
+
   return (
     <div>
         <Heading title='Shopping Cart' center/>
@@ -51,7 +82,8 @@ const CartClient = () => {
                     <span>{formatPrice(cartTotalAmount)}</span>
                  </div>
                     <p className="text-slate-500">Taxes and shipping calculate at checkout</p>
-                    <Button label="Checkout" onClick={()=>{}}/>
+                    <button onClick={()=>{handlePayment}}>Checkout</button>
+
                     <Link href={'/'} className="text-slate-500 flex items-center gap-1 mt-2" >
                      <MdArrowBack/>
                      <span>Continue Shopping</span>
