@@ -6,58 +6,41 @@ import Heading from "../components/Heading";
 import Button from "../components/Button";
 import ItemContent from "./ItemContent";
 import { formatPrice } from "@/utils/formatPrice";
-// import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-// import axios from "axios";
-import React, { useCallback } from "react";
-// import { loadStripe } from "@stripe/stripe-js";
 import Head from 'next/head';
 import Script from 'next/script'
+import PaymentButton from "../components/paymentButton/PaymentButton";
+import { checkout } from "../api/create-payment-intent/route";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { useEffect, useState } from "react";
 
-
+const stripePromise = loadStripe(
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+  );
+  
 const CartClient = () => {
 
-    const {cartProducts,handleClearCart,cartTotalAmount} = useCart();
+    const [clientSecret, setClientSecret] = useState("");
 
-    // const stripe = useStripe();
-    // const elements = useElements();
-
-    const makePayment = async ({ productId = null }) => {
-        console.log('paymnt');
-        
-        const data = await fetch("/api/razorpay", {
-            method: "POST",
-            headers: {
-              // Authorization: 'YOUR_AUTH_HERE'
-            },
-            body: JSON.stringify({ productId }),
-          }).then((t) => t.json());
-          const options = {
-            name: data.name,
-            currency: data.currency,
-            amount: data.amount,
-            order_id: data.id,
-            description: data.amountDesc,
-            // image: logoBase64,
-            handler: function (response) {
-              // Validate payment at server - using webhooks is a better idea.
-              // alert(response.razorpay_payment_id);
-              // alert(response.razorpay_order_id);
-              // alert(response.razorpay_signature);
-            },
-            prefill: {
-              name: "John Doe",
-              email: "jdoe@example.com",
-              contact: "9876543210",
-            },
-          };
-      
-          const paymentObject = new window.Razorpay(options);
-          paymentObject.open();
-      
-          paymentObject.on("payment.failed", function (response) {
-            alert("Payment failed. Please try again. Contact support for help");
-          });
+    useEffect(() => {
+        fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: [{ id: "xl-tshirt" }] }),
+        })
+          .then((res) => res.json())
+          .then((data) => setClientSecret(data.clientSecret));
+      }, []);
+    
+      const appearance = {
+        theme: 'stripe',
       };
+      const options = {
+        clientSecret,
+        appearance,
+      };
+
+    const {cartProducts,handleClearCart,cartTotalAmount} = useCart();
 
     if(!cartProducts || cartProducts.length === 0){
         return (
@@ -105,7 +88,11 @@ const CartClient = () => {
                     <span>{formatPrice(cartTotalAmount)}</span>
                  </div>
                     <p className="text-slate-500">Taxes and shipping calculate at checkout</p>
-                    <button  onClick={() => { makePayment({ productId: "example_ebook" })}}>Checkout</button>
+
+                    <Elements options={options} stripe={stripePromise}>
+                    <PaymentButton/>
+                    </Elements>
+
 
                     <Link href={'/'} className="text-slate-500 flex items-center gap-1 mt-2" >
                      <MdArrowBack/>

@@ -1,32 +1,32 @@
-// pages/api/razorpay.js
-const Razorpay = require("razorpay");
-const shortid = require("shortid");
+import { NextResponse, NextRequest } from "next/server";
+import Stripe from "stripe";
 
-// Initialize razorpay object
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_ID,
-    key_secret: process.env.RAZORPAY_KEY,
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY! as string, {
+  typescript: true,
+  apiVersion: "2022-11-15",
 });
 
-async function handler(req, res) {
-// TODO: Make sure to handle your payment here.
-// Create an order -> generate the OrderID -> Send it to the Front-end
-// Also, check the amount and currency on the backend (Security measure)
-const payment_capture = 1;
-const amount = 1 * 100 // amount in paisa. In our case it's INR 1
-const currency = "INR";
-const options = {
-    amount: (amount).toString(),
-    currency,
-    receipt: shortid.generate(),
-    payment_capture,
-    notes: { 
-        // These notes will be added to your transaction. So you can search it within their dashboard.
-        // Also, it's included in webhooks as well. So you can automate it.
-        paymentFor: "example_ebook",
-        userId: "user_id_here",
-        productId: 'your_product_id'
-    }
-};
+export async function POST(request: Request,res) {
+  const { data } = await request.json();
+  const { amount } = data;
+  console.log('data',data);
+  console.log('amount,amount');
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Number(amount) * 100,
+      currency: "USD",
+      automatic_payment_methods:{enabled: true }
+    });
+
+    console.log('intent responded');
+    res.send({
+        clientSecret: paymentIntent.client_secret
+    })    
+  } catch (error: any) {
+    console.log('error returned');
+    
+    return new NextResponse(error, {
+      status: 400,
+    });
+  }
 }
-export default handler
