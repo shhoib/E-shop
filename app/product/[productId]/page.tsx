@@ -1,5 +1,5 @@
 import Container from "@/app/components/Container"
-import ProductDetails from "./productDetails"
+import ProductDetails from "./ProductDetails"
 import ListRating from "./ListRating"
 import { products } from "@/utils/products"
 
