@@ -38,8 +38,10 @@ const CheckoutForm:React.FC<checkoutFormProps> = ({clientSecret,handleSetPayment
         setIsLoading(true);
 
         stripe.confirmPayment({
-            elements,redirect:'if_required'
+            elements,redirect:'if_required'            
         }).then(result=>{
+            console.log(result,'reult');
+            
             if(!result.error){
                 toast.success('Checkout Success');
 
@@ -58,7 +60,7 @@ const CheckoutForm:React.FC<checkoutFormProps> = ({clientSecret,handleSetPayment
             <Heading title='Enter Your details to complete checkout'/>
         </div>
         <h2  className="font-semibold mb-2">Address Information</h2>
-        <AddressElement options={{mode:'shipping',allowedCountries:['IN']}}/>
+        <AddressElement options={{mode:'shipping',allowedCountries:['US','KE']}}/>
         <h2 className="font-semibold mt-4 mb-2">Payment information</h2>
         <PaymentElement id='payment-element' options={{layout:'tabs'}}/>
         <div className="py-4 text-center text-slate-700 text-xl font-bold">

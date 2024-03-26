@@ -3,24 +3,22 @@ import { useCart } from "@/hooks/UseCart"
 import Link from "next/link";
 import {MdArrowBack} from 'react-icons/md'
 import Heading from "../components/Heading";
-import Button from "../components/Button";
 import ItemContent from "./ItemContent";
 import { formatPrice } from "@/utils/formatPrice";
-import Head from 'next/head';
-import Script from 'next/script'
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import { useEffect, useState } from "react";
+import Button from "../components/Button";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 
-const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-  );
-  
 const CartClient = () => {
 
-    const [clientSecret, setClientSecret] = useState("");
+  const router = useRouter();
 
     const {cartProducts,handleClearCart,cartTotalAmount} = useCart();
+
+    
+  const handleOrder = useCallback(()=>{    
+    router.push('/checkout')
+  },[router])
 
     if(!cartProducts || cartProducts.length === 0){
         return (
@@ -36,13 +34,8 @@ const CartClient = () => {
         )
     }
 
-  
-
   return (
     <div>
-        {/* <Head> */}
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      {/* </Head> */}
         <Heading title='Shopping Cart' center/>
         <div className="grid grid-cols-5 text-xs gap-4 pb-2 items-center mt-8">
             <div className="col-span-2 justify-self-start">PRODUCT</div>
@@ -68,11 +61,7 @@ const CartClient = () => {
                     <span>{formatPrice(cartTotalAmount)}</span>
                  </div>
                     <p className="text-slate-500">Taxes and shipping calculate at checkout</p>
-
-                    {/* <Elements options={options} stripe={stripePromise}> */}
-                    {/* <PaymentButton/> */}
-                    {/* </Elements> */}
-
+                    <Button label='Order Now' onClick={()=>handleOrder()}/>
 
                     <Link href={'/'} className="text-slate-500 flex items-center gap-1 mt-2" >
                      <MdArrowBack/>

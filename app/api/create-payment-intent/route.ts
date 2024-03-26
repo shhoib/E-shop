@@ -45,6 +45,7 @@ export async function POST(request:Request) {
     
    }else{
      const paymentIntent = await stripe.paymentIntents.create({
+      description: 'Software development services',
        amount: total,
        currency: "usd",
        automatic_payment_methods: {
